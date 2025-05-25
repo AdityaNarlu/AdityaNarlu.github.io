@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Reader - Legal Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .document-reader-header {
+            background: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 2px 10px rgba(139, 110, 78, 0.05);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .header-content h1 {
+            margin: 0;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: var(--text);
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            transition: color 0.2s ease;
+        }
+        
+        .back-button:hover {
+            color: var(--primary-hover);
+        }
+        
+        .document-reader-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .document-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(139, 110, 78, 0.05);
+            margin-bottom: 2rem;
+            width: 100%;
+            border: 1px solid var(--border);
+        }
+        
+        .document-card h2 {
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-family: var(--font-heading);
+            font-weight: 600;
+        }
+        
+        .upload-container {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .upload-button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .upload-button:active {
+            transform: translateY(0);
+        }
+        
+        .file-name {
+            margin-top: 0.75rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-analyze {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-analyze:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn-analyze:active {
+            transform: translateY(0);
+        }
+        
+        #pdfViewer {
+            width: 100%;
+            min-height: 500px;
+            margin-top: 1.5rem;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+        
+        #pdfViewer.has-pdf {
+            border: 2px solid var(--border);
+            background-color: white;
+        }
+        
+        .upload-prompt {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-light);
+            gap: 0.75rem;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 1.5rem;
+            color: white;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        #simplifiedDocModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(139, 110, 78, 0.1);
+            position: relative;
+            border: 1px solid var(--border);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+        
+        .close-modal:hover {
+            color: var(--text);
+        }
+        
+        .modal-header {
+            color: var(--primary);
+            margin-top: 0;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-body {
+            line-height: 1.6;
+            color: var(--text);
+        }
+        
+        .modal-body h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .modal-body p {
+            margin-bottom: 1rem;
+        }
+        
+        .modal-body ul {
+            margin-bottom: 1.5rem;
+        }
+        
+        .summary-box {
+            background-color: rgba(139, 110, 78, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="document-reader-header">
+        <div class="header-content">
+            <a href="dashboard.html" class="back-button">
+                ← Back to Dashboard
+            </a>
+            <h1>Document Reader</h1>
+            <div></div> <!-- Empty div for flex spacing -->
+        </div>
+    </header>
+
+    <div class="document-reader-container">
+        <div class="document-card">
+            <h2>Upload and Analyze Legal Documents</h2>
+            <p>Upload your legal document in PDF format. Our AI will help you understand complex legal language and extract key information.</p>
+            
+            <div class="upload-container">
+                <input type="file" id="pdfFileInput" accept=".pdf" class="file-input" />
+                <label for="pdfFileInput" class="upload-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Choose PDF File
+                </label>
+                <div class="file-name" id="fileName"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="analyzeBtn" class="btn-analyze" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 4V20M20 12H4"></path>
+                    </svg>
+                    <span>Analyze with AI</span>
+                </button>
+            </div>
+            
+            <div id="pdfViewer">
+                <div class="upload-prompt">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>Upload a PDF file to preview</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Analyzing with AI...</p>
+    </div>
+
+    <!-- Simplified Document Modal -->
+    <div id="simplifiedDocModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <h2 class="modal-header">Simplified Document</h2>
+            <div class="modal-body">
+                <h3>Purpose of the Agreement:</h3>
+                <p>This agreement is about settling medical malpractice disputes through arbitration rather than court.</p>
+                
+                <h3>Key Points:</h3>
+                <ul>
+                    <li>This agreement requires the use of neutral arbitrators to settle disputes.</li>
+                    <li>It includes claims for monetary damages and other remedies.</li>
+                    <li>The formal discovery process is similar to civil court proceedings.</li>
+                    <li>You keep your right to seek a jury trial if the arbitration agreement is found invalid.</li>
+                </ul>
+                
+                <h3>Who This Agreement Applies To:</h3>
+                <ul>
+                    <li>The doctors, employees, and agents of the medical group</li>
+                    <li>The patient and their legal representatives or heirs (even if the patient is a minor)</li>
+                </ul>
+                
+                <h3>How the Arbitration Process Works:</h3>
+                <ul>
+                    <li>Either party can start the arbitration process by giving written notice.</li>
+                    <li>All notices must be sent via U.S. mail (with return receipt requested).</li>
+                </ul>
+                
+                <h3>Right to Revoke:</h3>
+                <p>You have 30 days to revoke this agreement after signing it. To revoke, you must send a written notice by U.S. mail with return receipt requested.</p>
+                
+                <div class="summary-box">
+                    <p style="margin-bottom: 0;">By signing this agreement, you agree to resolve any medical malpractice disputes through arbitration instead of going to court or having a jury trial.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        // Set workerSrc property for PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get DOM elements
+            const pdfFileInput = document.getElementById('pdfFileInput');
+            const fileName = document.getElementById('fileName');
+            const pdfViewer = document.getElementById('pdfViewer');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const simplifiedDocModal = document.getElementById('simplifiedDocModal');
+            const closeModal = document.getElementById('closeModal');
+            
+            // Handle file selection
+            pdfFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                
+                if (file && file.type === 'application/pdf') {
+                    fileName.textContent = file.name;
+                    analyzeBtn.disabled = false;
+                    
+                    // Display PDF preview
+                    renderPDF(file);
+                } else {
+                    fileName.textContent = '';
+                    analyzeBtn.disabled = true;
+                    pdfViewer.innerHTML = `
+                        <div class="upload-prompt">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            <span>Please select a valid PDF file</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Handle analyze button click
+            analyzeBtn.addEventListener('click', () => {
+                loadingOverlay.style.display = 'flex';
+                
+                // Simulate AI analysis (in a real app, this would call an API)
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    simplifiedDocModal.style.display = 'flex';
+                }, 2000);
+            });
+            
+            // Close modal
+            closeModal.addEventListener('click', () => {
+                simplifiedDocModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            simplifiedDocModal.addEventListener('click', (e) => {
+                if (e.target === simplifiedDocModal) {
+                    simplifiedDocModal.style.display = 'none';
+                }
+            });
+            
+            // Function to render PDF
+            function renderPDF(file) {
+                return new Promise((resolve, reject) => {
+                    const fileReader = new FileReader();
+                    
+                    fileReader.onload = async function() {
+                        try {
+                            // Clear viewer and add loading indicator
+                            pdfViewer.innerHTML = `
+                                <div class="loading-message">
+                                    <div class="spinner"></div>
+                                    <span>Loading PDF...</span>
+                                </div>
+                            `;
+                            
+                            const typedArray = new Uint8Array(this.result);
+                            const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                            
+                            // Clear viewer and add has-pdf class
+                            pdfViewer.innerHTML = '';
+                            pdfViewer.classList.add('has-pdf');
+                            
+                            // Create container for pages
+                            const viewer = document.createElement('div');
+                            viewer.style.width = '100%';
+                            pdfViewer.appendChild(viewer);
+                            
+                            // Render pages
+                            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                                try {
+                                    const page = await pdf.getPage(pageNum);
+                                    
+                                    // Calculate scale to fit within viewer
+                                    const viewport = page.getViewport({ scale: 1 });
+                                    const containerWidth = viewer.clientWidth;
+                                    const scale = containerWidth / viewport.width;
+                                    const scaledViewport = page.getViewport({ scale });
+                                    
+                                    // Create canvas for page
+                                    const canvas = document.createElement('canvas');
+                                    const context = canvas.getContext('2d');
+                                    canvas.height = scaledViewport.height;
+                                    canvas.width = scaledViewport.width;
+                                    canvas.style.display = 'block';
+                                    canvas.style.margin = '0 auto';
+                                    
+                                    // Render PDF page
+                                    const renderContext = {
+                                        canvasContext: context,
+                                        viewport: scaledViewport
+                                    };
+                                    
+                                    await page.render(renderContext).promise;
+                                    
+                                    // Add page container
+                                    const pageDiv = document.createElement('div');
+                                    pageDiv.style.margin = '0 auto 20px';
+                                    pageDiv.style.maxWidth = '100%';
+                                    pageDiv.style.overflow = 'auto';
+                                    pageDiv.style.boxShadow = '0 2px 10px rgba(139, 110, 78, 0.1)';
+                                    pageDiv.style.borderRadius = '4px';
+                                    
+                                    // Add page number
+                                    const pageNumber = document.createElement('div');
+                                    pageNumber.textContent = `Page ${pageNum} of ${pdf.numPages}`;
+                                    pageNumber.style.textAlign = 'center';
+                                    pageNumber.style.padding = '10px 0';
+                                    pageNumber.style.color = '#666';
+                                    pageNumber.style.backgroundColor = '#F7F5F2';
+                                    
+                                    // Add canvas to page div
+                                    pageDiv.appendChild(canvas);
+                                    pageDiv.appendChild(pageNumber);
+                                    
+                                    // Add to viewer
+                                    viewer.appendChild(pageDiv);
+                                } catch (pageError) {
+                                    console.error(`Error rendering page ${pageNum}:`, pageError);
+                                    // Continue with next page even if one fails
+                                }
+                            }
+                            
+                            resolve();
+                        } catch (error) {
+                            console.error('Error processing PDF:', error);
+                            pdfViewer.innerHTML = `
+                                <div class="upload-prompt">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <span>Error loading PDF. The file may be corrupted or protected.</span>
+                                </div>
+                            `;
+                            reject(error);
+                        }
+                    };
+                    
+                    fileReader.onerror = function(error) {
+                        console.error('Error reading file:', error);
+                        pdfViewer.innerHTML = `
+                            <div class="upload-prompt">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span>Error reading file. Please try again.</span>
+                            </div>
+                        `;
+                        reject(error);
+                    };
+                    
+                    fileReader.readAsArrayBuffer(file);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

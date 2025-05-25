@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pranked... with Data!</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* Align items vertically */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5; /* Slightly different background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .prank-message {
+            font-size: 2.5em; /* Adjusted size */
+            color: #2c3e50; /* Darker color */
+            padding: 30px;
+            border: 2px dashed #3498db; /* Blue dashed border */
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .prank-message h1 {
+            margin-bottom: 10px;
+        }
+        .prank-message p {
+            font-size: 0.6em;
+            color: #7f8c8d;
+        }
+        .prank-message a {
+            font-size: 0.5em;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .prank-message a:hover {
+            text-decoration: underline;
+        }
+
+        /* PDF Input and Display Area */
+        .pdf-container {
+            background-color: #ffffff;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            margin: 20px auto 0;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+        /* Upload Container Styles */
+        .upload-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #4F46E5;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            font-size: 16px;
+        }
+
+        .upload-button:hover {
+            background-color: #4338CA;
+            transform: translateY(-1px);
+        }
+
+        .upload-button:active {
+            transform: translateY(0);
+        }
+
+        .upload-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        /* PDF Viewer Styles */
+        #pdfViewer {
+            transition: all 0.3s ease;
+        }
+
+        #pdfViewer.has-pdf {
+            border: 2px solid #E5E7EB;
+            background-color: white;
+        }
+
+        .csv-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            display: none; /* Hide default input */
+        }
+        .custom-file-upload {
+            border: 2px solid #3498db;
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .custom-file-upload:hover {
+            background-color: #2980b9;
+        }
+
+        #csvDisplayArea {
+            margin-top: 25px;
+            overflow-x: auto; /* For wide tables */
+        }
+
+        table.fancy-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+            color: #333;
+        }
+        table.fancy-table th,
+        table.fancy-table td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        table.fancy-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        table.fancy-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        table.fancy-table tr:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="prank-message">
+        <h1>Haha, you got pranked!</h1>
+        <p>(But hey, since you're here, want to see some data magic?)</p>
+        <p><a href="dashboard.html">Go back to Dashboard (or play with PDFs!)</a></p>
+    </div>
+
+    <div class="pdf-container">
+        <h2>Upload a PDF File</h2>
+        <div class="upload-container">
+            <input type="file" id="pdfFileInput" accept=".pdf" class="file-input" />
+            <label for="pdfFileInput" class="upload-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
+                </svg>
+                <span>Choose PDF File</span>
+            </label>
+            <p class="file-name" id="fileName">No file chosen</p>
+        </div>
+        <div id="pdfInfoArea"></div>
+        <div id="simplifyBtnContainer" style="margin: 15px 0; text-align: right; display: none;">
+            <button id="simplifyBtn" class="upload-button" style="background-color: #10B981; margin-right: 0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M12 4V20M20 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Simplify with AI</span>
+            </button>
+        </div>
+        <div id="pdfViewer" style="width: 100%; min-height: 500px; margin-top: 10px; border: 2px dashed #ccc; border-radius: 8px; display: flex; justify-content: center; align-items: center; background-color: #f9f9f9;">
+            <p style="text-align: center; color: #666; padding: 20px;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 10px; display: block;">
+                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM8 15.01L9.41 16.42L11 14.84V19H13V14.84L14.59 16.43L16 15.01L12.01 11L8 15.01Z" fill="#9CA3AF"/>
+                </svg>
+                <span>Upload a PDF file to preview</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="aiLoadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1001; justify-content: center; align-items: center; flex-direction: column; color: white;">
+        <div class="spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #10B981; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+        <p style="font-size: 18px; margin: 0;">Analyzing with AI...</p>
+    </div>
+
+    <!-- Simplified Document Modal -->
+    <div id="simplifiedDocModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 10px; width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative;">
+            <button id="closeModalBtn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            <h2 style="color: #2c3e50; margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #eee;">Simplified Document</h2>
+            <div style="line-height: 1.6; color: #333;">
+                <h3 style="color: #2c3e50; margin-top: 20px;">Purpose of the Agreement:</h3>
+                <p>This document is a contract between the patient and the medical provider stating that any disputes related to medical malpractice will be handled through arbitration, not through the court system.</p>
+                
+                <h3 style="color: #2c3e50; margin-top: 20px;">Key Points:</h3>
+                
+                <h4>Article I – Arbitration Instead of Court</h4>
+                <ul>
+                    <li>Any dispute about the medical care you receive (e.g., if it was unnecessary, improper, or negligent) will be decided by arbitration, not by a lawsuit or jury trial.</li>
+                    <li>By signing this, you give up your right to take the issue to court and agree to resolve it through arbitration as per the American Arbitration Association rules.</li>
+                </ul>
+                
+                <h4>Article II – Who Is Covered</h4>
+                <p>This agreement applies to:</p>
+                <ul>
+                    <li>The doctors, employees, and agents of the medical group</li>
+                    <li>The patient and their legal representatives or heirs (even if the patient is a minor)</li>
+                </ul>
+                <ul>
+                    <li>Either party can start the arbitration process by giving written notice.</li>
+                    <li>All notices must be sent via U.S. mail (with return receipt requested).</li>
+                </ul>
+                
+                <h4>Article III – Medical Responsibility</h4>
+                <ul>
+                    <li>The medical team will only provide treatments they consider necessary.</li>
+                    <li>If the patient refuses recommended treatment or doesn't follow medical advice, the provider may stop treating the patient.</li>
+                    <li>The medical group is not responsible for outcomes if the patient doesn't follow the prescribed treatment or if treatment is declined.</li>
+                </ul>
+                
+                <div style="background-color: #f8f9fa; border-left: 4px solid #e74c3c; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <h4 style="color: #e74c3c; margin-top: 0;">Important Notice:</h4>
+                    <p style="margin-bottom: 0;">By signing this agreement, you agree to resolve any medical malpractice disputes through arbitration instead of going to court or having a jury trial.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        
+        // Get modal elements
+        const modal = document.getElementById('simplifiedDocModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const simplifyBtn = document.getElementById('simplifyBtn');
+        
+        // Add spinner animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Open modal when Simplify with AI button is clicked
+        if (simplifyBtn && modal) {
+            simplifyBtn.addEventListener('click', function() {
+                const loadingOverlay = document.getElementById('aiLoadingOverlay');
+                
+                // Show loading overlay
+                loadingOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                // Simulate AI processing time (1.3 seconds)
+                setTimeout(() => {
+                    // Hide loading overlay and show results
+                    loadingOverlay.style.display = 'none';
+                    modal.style.display = 'flex';
+                }, 1300);
+            });
+        }
+        
+        // Close modal when X button is clicked
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // Re-enable scrolling
+            });
+        }
+        
+        // Close modal when clicking outside the modal content
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // Re-enable scrolling
+            }
+        });
+
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const pdfInfoArea = document.getElementById('pdfInfoArea');
+
+        // Update file name display and handle PDF upload
+        pdfFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = `Selected: ${file.name}`;
+                fileNameDisplay.style.color = '#374151';
+                pdfViewer.classList.add('has-pdf');
+                
+                if (file.type === 'application/pdf') {
+                    displayPDFInfo(file);
+                    renderPDF(file);
+                    document.getElementById('simplifyBtnContainer').style.display = 'block';
+                } else {
+                    pdfInfoArea.innerHTML = '<p style="color: red; margin-top: 10px;">Please select a valid PDF file.</p>';
+                    pdfViewer.classList.remove('has-pdf');
+                    pdfViewer.innerHTML = `
+                        <p style="text-align: center; color: #666; padding: 20px;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 10px; display: block;">
+                                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#EF4444"/>
+                            </svg>
+                            <span>Invalid file type. Please upload a PDF file.</span>
+                        </p>`;
+                }
+            }
+        });
+
+        function displayPDFInfo(file) {
+            const fileSize = (file.size / (1024 * 1024)).toFixed(2); // Convert to MB
+            const lastModified = new Date(file.lastModified).toLocaleString();
+            
+            const infoHTML = `
+                <div style="margin: 15px 0;">
+                    <p><strong>File Name:</strong> ${file.name}</p>
+                    <p><strong>File Size:</strong> ${fileSize} MB</p>
+                    <p><strong>Last Modified:</strong> ${lastModified}</p>
+                    <p><strong>File Type:</strong> PDF Document</p>
+                </div>
+            `;
+            
+            document.getElementById('pdfInfoArea').innerHTML = infoHTML;
+        }
+
+        async function renderPDF(file) {
+            const fileReader = new FileReader();
+            
+            return new Promise((resolve, reject) => {
+                fileReader.onload = async function() {
+                    try {
+                        const typedArray = new Uint8Array(this.result);
+                        
+                        // Load the PDF document
+                        const loadingTask = pdfjsLib.getDocument(typedArray);
+                        const pdf = await loadingTask.promise;
+                        
+                        const viewer = document.getElementById('pdfViewer');
+                        viewer.innerHTML = ''; // Clear previous content
+                        
+                        // Calculate scale to fit container width
+                        const containerWidth = viewer.clientWidth - 40; // Account for padding
+                        
+                        // Process each page
+                        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                            try {
+                                const page = await pdf.getPage(pageNum);
+                                const viewport = page.getViewport({ scale: 1.0 });
+                                
+                                // Calculate scale to fit container width
+                                const scale = Math.min(1.5, (containerWidth / viewport.width) * 0.95);
+                                const scaledViewport = page.getViewport({ scale });
+                                
+                                const canvas = document.createElement('canvas');
+                                const context = canvas.getContext('2d');
+                                
+                                // Set canvas dimensions
+                                canvas.height = scaledViewport.height;
+                                canvas.width = scaledViewport.width;
+                                
+                                // Render PDF page
+                                const renderContext = {
+                                    canvasContext: context,
+                                    viewport: scaledViewport
+                                };
+                                
+                                await page.render(renderContext).promise;
+                                
+                                // Add page container
+                                const pageDiv = document.createElement('div');
+                                pageDiv.style.margin = '0 auto 20px';
+                                pageDiv.style.maxWidth = '100%';
+                                pageDiv.style.overflow = 'auto';
+                                pageDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                                pageDiv.style.borderRadius = '4px';
+                                
+                                // Add page number
+                                const pageNumber = document.createElement('div');
+                                pageNumber.textContent = `Page ${pageNum} of ${pdf.numPages}`;
+                                pageNumber.style.textAlign = 'center';
+                                pageNumber.style.padding = '10px 0';
+                                pageNumber.style.color = '#666';
+                                pageNumber.style.backgroundColor = '#f8f9fa';
+                                
+                                // Add canvas to page div
+                                pageDiv.appendChild(canvas);
+                                pageDiv.appendChild(pageNumber);
+                                
+                                // Add to viewer
+                                viewer.appendChild(pageDiv);
+                                
+                            } catch (pageError) {
+                                console.error(`Error rendering page ${pageNum}:`, pageError);
+                                // Continue with next page even if one fails
+                            }
+                        }
+                        
+                        resolve();
+                        
+                    } catch (error) {
+                        console.error('Error processing PDF:', error);
+                        pdfViewer.innerHTML = `
+                            <p style="text-align: center; color: #666; padding: 20px;">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 10px; display: block;">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#EF4444"/>
+                                </svg>
+                                <span>Error loading PDF. The file may be corrupted or protected.</span>
+                            </p>`;
+                        reject(error);
+                    }
+                };
+                
+                fileReader.onerror = function(error) {
+                    console.error('Error reading file:', error);
+                    pdfViewer.innerHTML = `
+                        <p style="text-align: center; color: #666; padding: 20px;">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 10px; display: block;">
+                                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="#EF4444"/>
+                            </svg>
+                            <span>Error reading file. Please try again.</span>
+                        </p>`;
+                    reject(error);
+                };
+                
+                fileReader.readAsArrayBuffer(file);
+            });
+        }
+    </script>
+</body>
+</html>

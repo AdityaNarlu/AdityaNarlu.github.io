@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know Your Rights - Legal Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="kyr-header">
+            <div class="header-content">
+                <h1>Know Your Rights</h1>
+                <button id="getAiInsightButton" class="ai-insight-button">Get AI Legal Insight</button>
+                <div id="searchSection" class="ai-search-section" style="display: none;">
+                    <h2>Legal Information for <span id="selectedState"></span></h2>
+                    <div class="ai-search-container">
+                        <input type="text" id="aiSearchInput" placeholder="Or ask a specific question about laws in your state..." class="ai-search-input">
+                        <button id="aiSearchButton" class="ai-search-button">Ask AI</button>
+                            
+                    </div>
+                    <div id="aiSearchResults" class="ai-search-results"></div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="state-selection-container">
+                <div id="initialState">
+                    <h2>Know Your Rights</h2>
+                    <p>Select your state to explore your legal rights and protections</p>
+                    <div class="state-form">
+                        <select id="stateSelect" class="state-select">
+                            <option value="">Select a state...</option>
+                        <option value="AL">Alabama</option>
+                        <option value="AK">Alaska</option>
+                        <option value="AZ">Arizona</option>
+                        <option value="AR">Arkansas</option>
+                        <option value="CA">California</option>
+                        <option value="CO">Colorado</option>
+                        <option value="CT">Connecticut</option>
+                        <option value="DE">Delaware</option>
+                        <option value="FL">Florida</option>
+                        <option value="GA">Georgia</option>
+                        <option value="HI">Hawaii</option>
+                        <option value="ID">Idaho</option>
+                        <option value="IL">Illinois</option>
+                        <option value="IN">Indiana</option>
+                        <option value="IA">Iowa</option>
+                        <option value="KS">Kansas</option>
+                        <option value="KY">Kentucky</option>
+                        <option value="LA">Louisiana</option>
+                        <option value="ME">Maine</option>
+                        <option value="MD">Maryland</option>
+                        <option value="MA">Massachusetts</option>
+                        <option value="MI">Michigan</option>
+                        <option value="MN">Minnesota</option>
+                        <option value="MS">Mississippi</option>
+                        <option value="MO">Missouri</option>
+                        <option value="MT">Montana</option>
+                        <option value="NE">Nebraska</option>
+                        <option value="NV">Nevada</option>
+                        <option value="NH">New Hampshire</option>
+                        <option value="NJ">New Jersey</option>
+                        <option value="NM">New Mexico</option>
+                        <option value="NY">New York</option>
+                        <option value="NC">North Carolina</option>
+                        <option value="ND">North Dakota</option>
+                        <option value="OH">Ohio</option>
+                        <option value="OK">Oklahoma</option>
+                        <option value="OR">Oregon</option>
+                        <option value="PA">Pennsylvania</option>
+                        <option value="RI">Rhode Island</option>
+                        <option value="SC">South Carolina</option>
+                        <option value="SD">South Dakota</option>
+                        <option value="TN">Tennessee</option>
+                        <option value="TX">Texas</option>
+                        <option value="UT">Utah</option>
+                        <option value="VT">Vermont</option>
+                        <option value="VA">Virginia</option>
+                        <option value="WA">Washington</option>
+                        <option value="WV">West Virginia</option>
+                        <option value="WI">Wisconsin</option>
+                        <option value="WY">Wyoming</option>
+                    </select>
+                    <button id="submitState" class="submit-button">Get Rights Information</button>
+                </div>
+            </div>
+            <div id="rightsCategories" style="display: none;">
+                <div class="ai-search-header">
+                    <h2>Your Rights in <span id="selectedStateName"></span></h2>
+                    <p>Select a category to learn about your rights</p>
+                </div>
+                <div class="category-grid">
+                    <div class="category-card" data-category="employment">
+                        <div class="category-icon">💼</div>
+                        <h3>Employment</h3>
+                        <p>Workplace rights, discrimination, wages, and more</p>
+                    </div>
+                    <div class="category-card" data-category="housing">
+                        <div class="category-icon">🏠</div>
+                        <h3>Housing</h3>
+                        <p>Tenant rights, eviction, and housing discrimination</p>
+                    </div>
+                    <div class="category-card" data-category="criminal">
+                        <div class="category-icon">⚖️</div>
+                        <h3>Criminal</h3>
+                        <p>Your rights when dealing with law enforcement</p>
+                    </div>
+                    <div class="category-card" data-category="family">
+                        <div class="category-icon">👨‍👩‍👧‍👦</div>
+                        <h3>Family</h3>
+                        <p>Divorce, child custody, and domestic violence</p>
+                    </div>
+                    <div class="category-card" data-category="consumer">
+                        <div class="category-icon">🛍️</div>
+                        <h3>Consumer</h3>
+                        <p>Your rights when making purchases or using services</p>
+                    </div>
+                    <div class="category-card" data-category="general">
+                        <div class="category-icon">ℹ️</div>
+                        <h3>General Rights</h3>
+                        <p>Overview of your basic legal rights</p>
+                    </div>
+                </div>
+                <div id="rightsContent" class="rights-content">
+                    <!-- Content will be loaded here -->
+                </div>
+                <button id="backToCategories" class="back-button">← Back to Categories</button>
+            </div>
+            <div class="laws-container" id="lawsContainer" style="display: none;">
+                <div class="laws-header">
+                    <h2>State Laws for <span id="stateName"></span></h2>
+                </div>
+                <div class="laws-content" id="lawsContent">
+                    <!-- Laws will be dynamically inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Loading Overlay for AI Insights -->
+    <div id="aiInsightLoadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(139, 110, 78, 0.7); z-index: 1001; justify-content: center; align-items: center; flex-direction: column; color: white;">
+        <div class="spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #8B6E4E; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+        <p style="font-size: 18px; margin: 0;">Analyzing your request...</p>
+    </div>
+    
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <script>
+        // Add spinner animation if not already added
+        if (!document.getElementById('spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add click handler for AI Insight button
+        document.addEventListener('DOMContentLoaded', function() {
+            const insightButton = document.getElementById('getAiInsightButton');
+            const loadingOverlay = document.getElementById('aiInsightLoadingOverlay');
+            
+            if (insightButton && loadingOverlay) {
+                insightButton.addEventListener('click', function() {
+                    // Show loading overlay
+                    loadingOverlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Simulate AI processing time (1.2 seconds)
+                    setTimeout(() => {
+                        // Hide loading overlay
+                        loadingOverlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                        
+                        // Show the search section (existing functionality)
+                        const searchSection = document.getElementById('searchSection');
+                        if (searchSection) {
+                            searchSection.style.display = 'block';
+                        }
+                    }, 1200);
+                });
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
